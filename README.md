@@ -1,8 +1,27 @@
-#                                                    AlgoTrading
+# Stock Price Prediction Using LSTM
 
- ##                Aim:   Use neural network alogirthm to forecast the stock prices .
+This repository contains a Python script that uses a Long Short-Term Memory (LSTM) neural network to predict stock prices. The model is trained on historical stock data fetched from Yahoo Finance using the `yfinance` library.
 
+## Features
 
-    1. Using LSTM to forecast stock movements 
+- Fetches stock data from Yahoo Finance.
+- Preprocesses the stock data using MinMax scaling.
+- Builds and trains an LSTM model to predict future stock prices.
+- Visualizes the actual vs predicted stock prices.
+- Displays the actual and predicted prices for each date.
 
-  
+## Requirements
+
+To run the script, you will need the following Python packages:
+
+- `numpy`
+- `pandas`
+- `yfinance`
+- `matplotlib`
+- `scikit-learn`
+- `tensorflow`
+
+You can install the required packages by running:
+
+```bash
+pip install numpy pandas yfinance matplotlib scikit-learn tensorflow
