@@ -25,3 +25,7 @@ You can install the required packages by running:
 
 ```bash
 pip install numpy pandas yfinance matplotlib scikit-learn tensorflow
+
+
+
+
