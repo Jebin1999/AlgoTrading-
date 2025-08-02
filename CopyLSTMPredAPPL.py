@@ -8,20 +8,27 @@ Created on Mon Jun 26 12:23:25 2023
 
 import numpy as np
 import pandas as pd
-import yfinance as yf
+from alpha_vantage.timeseries import TimeSeries
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 # Define the start and end dates for the data
 start = '2010-01-01'
-end = '2023-11-25'
+end = '2023-11-25' 
 
-# Fetch the stock data from Yahoo Finance
-api_key = 'DSCL4PPQQKL33HQ1'  # Replace with your actual API key
-yf.pdr_override()
-df = yf.download('AAPL', start=start, end=end)
+# Fetch AAPL data using Alpha Vantage
+api_key = "     "  # Your Alpha Vantage API key
+ts = TimeSeries(key=api_key, output_format='pandas')
+data, meta_data = ts.get_daily(symbol='AAPL', outputsize='full')
+
+# Process to match previous format
+df = data.sort_index()  # Ensure chronological order
+df = df[['4. close']]   # Keep only close price
+df.columns = ['Close']  # Rename to match previous code
+
 
 # Preprocess the data
 scaler = MinMaxScaler(feature_range=(0, 1))
@@ -94,4 +101,33 @@ for i in range(len(predicted_df)):
     actual_price = y_test[i]
     predicted_price = predicted_df['Predicted Price'].iloc[i]
     print(f"Date: {date_str}, Actual Price: {actual_price}, Predicted Price: {predicted_price}")
+
+results_df = pd.DataFrame({
+    'Date': predicted_df.index.strftime('%Y-%m-%d'),
+    'Actual Price': y_test,
+    'Predicted Price': predicted_df['Predicted Price'].values
+})
+
+
+
+
+# Calculate evaluation metrics
+mse = mean_squared_error(y_test, predicted_prices)
+rmse = np.sqrt(mse)
+mae = mean_absolute_error(y_test, predicted_prices)
+r2 = r2_score(y_test, predicted_prices)
+
+# Print metrics
+print("\nModel Evaluation Metrics:")
+print(f"Mean Squared Error (MSE): {mse:.4f}")
+print(f"Root Mean Squared Error (RMSE): {rmse:.4f}")
+print(f"Mean Absolute Error (MAE): {mae:.4f}")
+print(f"R-squared (R²): {r2:.4f}")
+
+# Store metrics in a dictionary or DataFrame (optional)
+metrics_df = pd.DataFrame({
+    'Metric': ['MSE', 'RMSE', 'MAE', 'R-squared'],
+    'Value': [mse, rmse, mae, r2]
+})
+
 
