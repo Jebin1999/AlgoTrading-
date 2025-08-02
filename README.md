@@ -1,6 +1,6 @@
 # Stock Price Prediction Using LSTM
 
-This repository contains a Python script that uses a Long Short-Term Memory (LSTM) neural network to predict stock prices. The model is trained on historical stock data fetched from Yahoo Finance using the `yfinance` library.
+This repository contains a Python script that uses a Long Short-Term Memory (LSTM) neural network to predict stock prices. The model is trained on historical stock data fetched from alpha vantage API .
 
 ## Features
 
