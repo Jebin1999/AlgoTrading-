@@ -24,7 +24,7 @@ To run the script, you will need the following Python packages:
 You can install the required packages by running:
 
 ```bash
-pip install numpy pandas yfinance matplotlib scikit-learn tensorflow
+pip install numpy pandas alpha-vantage matplotlib scikit-learn tensorflow
 
 
 
