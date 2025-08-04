@@ -22,7 +22,7 @@ end = '2023-11-25'
 # Fetch AAPL data using Alpha Vantage
 api_key = "     "  # Your Alpha Vantage API key
 ts = TimeSeries(key=api_key, output_format='pandas')
-data, meta_data = ts.get_daily(symbol='AAPL', outputsize='full')
+data, meta_data = ts.get_daily(symbol='ETHEUR', outputsize='full')
 
 # Process to match previous format
 df = data.sort_index()  # Ensure chronological order
@@ -79,20 +79,37 @@ X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 predicted_data = model.predict(X_test)
 predicted_prices = scaler.inverse_transform(predicted_data)
 
+ #Get actual prices aligned with predictions
+actual_prices = df['Close'].values[train_size+window_size:]
+
+# Calculate prediction probabilities (confidence)
+rmse = np.sqrt(mean_squared_error(actual_prices, predicted_prices))
+prediction_probabilities = np.exp(-np.abs(actual_prices.reshape(-1, 1) - predicted_prices) / rmse)
+
+
 # Create a DataFrame to store the predicted prices with dates
-predicted_df = pd.DataFrame({'Date': df.index[train_size+window_size:], 'Predicted Price': predicted_prices.flatten()})
+predicted_df = pd.DataFrame({
+    'Date': df.index[train_size+window_size:],
+    'Actual Price': actual_prices.flatten(),
+    'Predicted Price': predicted_prices.flatten(),
+    'Prediction Probability': prediction_probabilities.flatten()
+})
 
 # Set the dates as the index for the DataFrame
 predicted_df.set_index('Date', inplace=True)
 
+asset_name = meta_data.get('2. Symbol', 'Asset')
+
 # Visualize the actual and predicted prices
-plt.plot(df.index[train_size+window_size:], y_test, color='blue', label='Actual Price')
-plt.plot(predicted_df.index, predicted_df['Predicted Price'], color='red', label='Predicted Price')
+plt.figure(figsize=(10,5))
+plt.plot(predicted_df.index, predicted_df['Actual Price'], label=f'{asset_name} Actual', color='blue')
+plt.plot(predicted_df.index, predicted_df['Predicted Price'], label= f'{asset_name} Predicted', color = 'red')
 plt.xlabel('Date')
-plt.ylabel('Stock Price')
-plt.title('TESLA  Stock Price Prediction')
+plt.ylabel('Price')
+plt.title(f'{asset_name} Price Prediction (LSTM)')
 plt.xticks(rotation=45)  # Rotate x-axis dates by 45 degrees
-plt.legend()
+plt.grid(True)
+plt.tight_layout()
 plt.show()
 
 # Print the actual and predicted prices with date and time
@@ -100,12 +117,14 @@ for i in range(len(predicted_df)):
     date_str = predicted_df.index[i].strftime('%Y-%m-%d')
     actual_price = y_test[i]
     predicted_price = predicted_df['Predicted Price'].iloc[i]
-    print(f"Date: {date_str}, Actual Price: {actual_price}, Predicted Price: {predicted_price}")
+    pred_probs = predicted_df['Prediction Probability'].iloc[i]
+    print(f"Date: {date_str}, Actual Price: {actual_price}, Predicted Price: {predicted_price}, Prediction Probablity {pred_probs}")
 
 results_df = pd.DataFrame({
     'Date': predicted_df.index.strftime('%Y-%m-%d'),
     'Actual Price': y_test,
-    'Predicted Price': predicted_df['Predicted Price'].values
+    'Predicted Price': predicted_df['Predicted Price'].values,
+    'Predicton Probablity': predicted_df['Prediction Probability'].values
 })
 
 
